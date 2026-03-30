@@ -33,6 +33,20 @@ func TestConfig_Validate(t *testing.T) {
 		cfg.DataDir = ""
 		require.Error(t, cfg.Validate())
 	})
+
+	t.Run("zero tsdb block range", func(t *testing.T) {
+		cfg, _ := blockBuilderConfig(t, "kafka:9092", nil)
+
+		cfg.TSDBBlockRange = 0
+		require.Error(t, cfg.Validate())
+	})
+
+	t.Run("negative tsdb block range", func(t *testing.T) {
+		cfg, _ := blockBuilderConfig(t, "kafka:9092", nil)
+
+		cfg.TSDBBlockRange = -1 * time.Hour
+		require.Error(t, cfg.Validate())
+	})
 }
 
 const (
@@ -63,6 +77,8 @@ func blockBuilderConfig(t testing.TB, kafkaAddr string, tenantLimits validation.
 	flagext.DefaultValues(&cfg.BlocksStorage)
 	cfg.BlocksStorage.Bucket.Backend = bucket.Filesystem
 	cfg.BlocksStorage.Bucket.Filesystem.Directory = t.TempDir()
+
+	cfg.TSDBBlockRange = 2 * time.Hour
 
 	limits := defaultLimitsTestConfig()
 	limits.OutOfOrderTimeWindow = 2 * model.Duration(time.Hour)

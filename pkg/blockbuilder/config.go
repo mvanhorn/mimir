@@ -79,5 +79,9 @@ func (cfg *Config) Validate() error {
 		return fmt.Errorf("data-dir is required")
 	}
 
+	if cfg.TSDBBlockRange <= 0 {
+		return fmt.Errorf("tsdb block range must be positive")
+	}
+
 	return nil
 }
